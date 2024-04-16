@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { env } from "hono/adapter";
 import { cors } from "hono/cors";
 
 // This ensures c.env.MEDIA_BUCKET is correctly typed
@@ -8,16 +7,15 @@ type Bindings = {
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
-app.use("/*", cors());
+app.use("/api/*", cors());
 
-app.put("/", async (c) => {
+app.put("/api/images/upload", async (c) => {
   const body = await c.req.parseBody({
     all: true,
   });
   const image = body["image"];
   try {
     const res = await c.env.MEDIA_BUCKET.put(image.name, image);
-    console.log(JSON.stringify(res));
     return c.json({
       message: `Successfully uploaded ${image.name} to the bucket.`,
       body: image,
@@ -27,12 +25,12 @@ app.put("/", async (c) => {
   }
 });
 
-app.get("/all", async (c) => {
+app.get("/api/images", async (c) => {
   const objects = await c.env.MEDIA_BUCKET.list();
   return c.json(objects);
 });
 
-app.get("/:file_name", async (c) => {
+app.get("/api/images/:file_name", async (c) => {
   const { file_name } = c.req.param();
   const object = await c.env.MEDIA_BUCKET.get(file_name);
   if (object === null) {
