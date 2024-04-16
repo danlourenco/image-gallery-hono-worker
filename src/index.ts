@@ -16,10 +16,13 @@ app.put("/api/images/upload", async (c) => {
   const image = body["image"];
   try {
     const res = await c.env.MEDIA_BUCKET.put(image.name, image);
-    return c.json({
-      message: `Successfully uploaded ${image.name} to the bucket.`,
-      body: image,
-    });
+    return c.json(
+      {
+        message: `Successfully uploaded ${image.name} to the bucket.`,
+        key: res.key,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     return new Response(`Error uploading. ${error} `, { status: 500 });
   }
